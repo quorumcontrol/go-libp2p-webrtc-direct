@@ -12,6 +12,7 @@ import (
 	"github.com/libp2p/go-libp2p-core/transport"
 	ma "github.com/multiformats/go-multiaddr"
 	manet "github.com/multiformats/go-multiaddr-net"
+	"golang.org/x/crypto/acme/autocert"
 )
 
 // Listener is an interface closely resembling the net.Listener interface.
@@ -23,14 +24,21 @@ type Listener struct {
 }
 
 func newListener(config *connConfig) (*Listener, error) {
+	var ln net.Listener
+	var err error
+
 	lnet, lnaddr, err := manet.DialArgs(config.maAddr)
 	if err != nil {
 		return nil, err
 	}
 
-	ln, err := net.Listen(lnet, lnaddr)
-	if err != nil {
-		return nil, fmt.Errorf("failed to listen: %v", err)
+	if domain := config.transport.sslDomain; domain == "" {
+		ln, err = net.Listen(lnet, lnaddr)
+		if err != nil {
+			return nil, fmt.Errorf("failed to listen: %v", err)
+		}
+	} else {
+		ln = autocert.NewListener(domain)
 	}
 
 	// Update the addr after listening
@@ -59,6 +67,7 @@ func newListener(config *connConfig) (*Listener, error) {
 
 	go func() {
 		log.Debug("srv serving")
+
 		srvErr := srv.Serve(ln)
 		if srvErr != nil {
 			log.Warningf("failed to start server: %v", srvErr)

@@ -17,4 +17,5 @@ require (
 	github.com/multiformats/go-multibase v0.0.1
 	github.com/pion/datachannel v1.4.5
 	github.com/pion/webrtc/v2 v2.0.27
+	golang.org/x/crypto v0.0.0-20190618222545-ea8f1a30c443
 )

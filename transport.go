@@ -18,6 +18,7 @@ type Transport struct {
 	localID       peer.ID
 	api           *webrtc.API
 	Upgrader      *tptu.Upgrader
+	sslDomain     string
 }
 
 func NewTransport(upgrader *tptu.Upgrader) *Transport {
@@ -36,6 +37,14 @@ func NewTransport(upgrader *tptu.Upgrader) *Transport {
 		localID:       peer.ID(1),
 		api:           api,
 		Upgrader:      upgrader,
+	}
+}
+
+func SecureTransportContructor(sslDomain string) func(upgrader *tptu.Upgrader) *Transport {
+	return func(upgrader *tptu.Upgrader) *Transport {
+		t := NewTransport(upgrader)
+		t.sslDomain = sslDomain
+		return t
 	}
 }
 
